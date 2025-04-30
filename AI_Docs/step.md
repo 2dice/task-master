@@ -82,7 +82,7 @@ npm install -D @playwright/test
 npx playwright install
 ```
 
-### Step 2: 基本レイアウト構築
+### Step 2: 基本レイアウト構築 (done)
 
 **参照が必要な設計情報(view_line_rangeコマンド等で取得)**:
 
