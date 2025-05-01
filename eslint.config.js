@@ -39,5 +39,13 @@ export default tseslint.config(
       // shadcn/uiコンポーネントでは複数のエクスポートを許可
       'react-refresh/only-export-components': 'off',
     },
+  },
+  // インターフェース定義の未使用パラメータの警告を抑制
+  {
+    files: ['**/types/**/*.{ts,tsx}'],
+    rules: {
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+    },
   }
 );

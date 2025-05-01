@@ -152,7 +152,7 @@ npx playwright install
 </div>
 ```
 
-### Step 3: タスク状態管理
+### Step 3: タスク状態管理 (done)
 
 **参照が必要な設計情報(view_line_rangeコマンド等で取得)**:
 

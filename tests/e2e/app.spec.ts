@@ -5,7 +5,7 @@ test.describe('タスクマスターアプリの基本テスト', () => {
   // 各テストの前にローカルサーバーのホームページに移動
   test.beforeEach(async ({ page }) => {
     // 開発サーバーのURLを指定（デフォルトはlocalhost:5173）
-    await page.goto('http://localhost:5173/');
+    await page.goto('/');
   });
 
   // 4分割レイアウトの基本UI要素が表示されるかをテスト
@@ -23,8 +23,12 @@ test.describe('タスクマスターアプリの基本テスト', () => {
     await expect(page.getByText('タスクプールエリア', { exact: false })).toBeVisible();
   });
 
-  // ハンバーガーメニューのテスト
+  // ハンバーガーメニューのテストとZustand状態の変化確認
   test('ハンバーガーメニューで左側エリアが開閉できる', async ({ page }) => {
+    // 初期状態のZustand確認
+    const initialState = await getZustandState(page);
+    expect(initialState.showSideMenu).toBe(false);
+
     // 最初にサイドバーのタイトルが表示されていないことを確認
     const taskCreationTitle = page.getByText('タスク確認・作成', { exact: true });
     await expect(taskCreationTitle).not.toBeVisible();
@@ -37,17 +41,29 @@ test.describe('タスクマスターアプリの基本テスト', () => {
     await expect(taskCreationTitle).toBeVisible();
 
     // サイドバーの内容も表示されることを確認
-    await expect(page.getByText('ここにタスク作成UI', { exact: false })).toBeVisible();
+    await expect(page.getByText('タスクの作成・編集・削除', { exact: false })).toBeVisible();
+
+    // サイドメニューを開いた後のZustand状態確認
+    const stateAfterOpen = await getZustandState(page);
+    expect(stateAfterOpen.showSideMenu).toBe(true);
 
     // ESCキーでサイドバーを閉じる
     await page.keyboard.press('Escape');
 
     // サイドバーが閉じたことを確認
     await expect(taskCreationTitle).not.toBeVisible();
+
+    // サイドメニューを閉じた後のZustand状態確認
+    const stateAfterClose = await getZustandState(page);
+    expect(stateAfterClose.showSideMenu).toBe(false);
   });
 
-  // レベル選択ドロップダウンのテスト - 選択機能まで完全テスト
+  // レベル選択ドロップダウンのテスト - 選択機能とZustand状態の変化確認
   test('レベル選択ドロップダウンでレベルを変更できる', async ({ page }) => {
+    // 初期状態のZustand確認
+    const initialState = await getZustandState(page);
+    expect(initialState.level).toBe(1);
+
     // 1. レベル選択ボタンの特定
     const levelButton = page.locator('button[role="combobox"]');
     await expect(levelButton).toBeVisible();
@@ -74,9 +90,6 @@ test.describe('タスクマスターアプリの基本テスト', () => {
     // 3. レベル3を選択
     const level3Option = page.locator('[role="option"]').filter({ hasText: 'レベル 3' });
 
-    // クリック前にスクリーンショットを撮る
-    await page.screenshot({ path: 'test-results/dropdown-open.png' });
-
     // レベル3をクリック
     await level3Option.click();
     await page.waitForTimeout(500); // 選択アニメーション完了を待つ
@@ -92,6 +105,10 @@ test.describe('タスクマスターアプリの基本テスト', () => {
     const finalButtonText = await levelButton.textContent();
     console.log(`選択後の状態: "${finalButtonText}"`);
 
+    // レベル変更後のZustand状態確認
+    const stateAfterLevel3 = await getZustandState(page);
+    expect(stateAfterLevel3.level).toBe(3);
+
     // 5. 再確認：別のレベルも選択できることを確認
     // 再度ドロップダウンを開く
     await levelButton.click();
@@ -104,6 +121,34 @@ test.describe('タスクマスターアプリの基本テスト', () => {
 
     // レベル5に変わったことを確認
     await expect(levelButton).toContainText('レベル 5');
+
+    // レベル5に変更後のZustand状態確認
+    const stateAfterLevel5 = await getZustandState(page);
+    expect(stateAfterLevel5.level).toBe(5);
+  });
+
+  // Zustandストアの初期状態テスト
+  test('Zustandストアの初期状態が正しく設定されている', async ({ page }) => {
+    // Zustandストアの状態を確認
+    const state = await getZustandState(page);
+
+    // プリセットタスクがあることを確認
+    expect(state.availableTasks.length).toBeGreaterThan(0);
+
+    // 最初のプリセットタスクの内容を確認
+    const firstTask = state.availableTasks[0];
+    expect(firstTask).toHaveProperty('id');
+    expect(firstTask).toHaveProperty('name');
+    expect(firstTask).toHaveProperty('duration1');
+    expect(firstTask).toHaveProperty('color');
+    expect(firstTask).toHaveProperty('isPreset', true);
+
+    // 初期状態を確認
+    expect(state.level).toBe(1);
+    expect(state.showSideMenu).toBe(false);
+    expect(state.taskPool).toHaveLength(0);
+    expect(state.layoutTasks).toHaveLength(0);
+    expect(state.showingInterruption).toBe(false);
   });
 
   // レスポンシブ対応のテスト
@@ -127,3 +172,17 @@ test.describe('タスクマスターアプリの基本テスト', () => {
     await expect(page.getByText('タスクプールエリア', { exact: false })).toBeVisible();
   });
 });
+
+/**
+ * Zustandストアの状態を取得するヘルパー関数
+ */
+async function getZustandState(page) {
+  return await page.evaluate(() => {
+    // @ts-expect-error: グローバルオブジェクトアクセス
+    if (window.AppStore && window.AppStore.getState) {
+      // @ts-expect-error: グローバルオブジェクトアクセス
+      return window.AppStore.getState();
+    }
+    return null;
+  });
+}

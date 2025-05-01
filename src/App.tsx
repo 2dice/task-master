@@ -1,7 +1,13 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetTitle,
+  SheetDescription,
+} from '@/components/ui/sheet';
 import {
   Select,
   SelectContent,
@@ -10,18 +16,31 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { useAppStore } from '@/store';
 
 function App() {
-  const [showSideMenu, setShowSideMenu] = useState(false);
-  const [selectedLevel, setSelectedLevel] = useState<string>('1');
+  // Zustandストアから状態とアクションを取得（修正版: useShallowをシミュレート）
+  const level = useAppStore((state) => state.level);
+  const showSideMenu = useAppStore((state) => state.showSideMenu);
+  const setLevel = useAppStore((state) => state.setLevel);
+  const toggleSideMenu = useAppStore((state) => state.toggleSideMenu);
+
+  // 開発用：コンソールにAppStoreを公開（テスト用）
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      // @ts-expect-error: グローバルオブジェクトに動的プロパティを追加
+      window.AppStore = useAppStore;
+      console.log('AppStore initialized:', useAppStore.getState());
+    }
+  }, []);
 
   return (
-    <div className="flex flex-col h-screen w-screen min-w-full max-w-none bg-slate-100">
+    <div className="flex flex-col h-screen w-screen min-w-full max-w-none bg-slate-100 app-container">
       {/* ヘッダー: レベル設定エリア */}
       <header className="w-full min-w-full bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-10">
         <div className="flex items-center gap-3">
           {/* サイドメニュー: タスク確認・作成エリア */}
-          <Sheet open={showSideMenu} onOpenChange={setShowSideMenu}>
+          <Sheet open={showSideMenu} onOpenChange={toggleSideMenu}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:flex hover:bg-slate-100">
                 <Menu className="h-5 w-5" />
@@ -31,8 +50,9 @@ function App() {
               side="left"
               className="w-[85vw] sm:w-[400px] md:w-[350px] lg:max-w-sm border-r-2 bg-white p-6"
             >
-              <div className="h-full flex flex-col">
-                <h2 className="text-xl font-bold mb-6 text-indigo-600">タスク確認・作成</h2>
+              <SheetTitle>タスク確認・作成</SheetTitle>
+              <SheetDescription>タスクの作成・編集・削除ができます</SheetDescription>
+              <div className="h-full flex flex-col mt-6">
                 <div className="flex-grow overflow-auto">
                   <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 text-center">
                     <p className="text-slate-500">ここにタスク作成UIが入ります</p>
@@ -44,7 +64,10 @@ function App() {
           <h1 className="text-xl font-bold text-indigo-600">タスクマスター</h1>
         </div>
 
-        <Select value={selectedLevel} onValueChange={setSelectedLevel}>
+        <Select
+          value={level.toString()}
+          onValueChange={(value) => setLevel(Number(value) as 1 | 2 | 3 | 4 | 5)}
+        >
           <SelectTrigger className="w-[180px] md:w-[220px] lg:w-[280px] bg-white border-slate-200">
             <SelectValue placeholder="レベルを選択" />
           </SelectTrigger>
