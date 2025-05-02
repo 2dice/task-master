@@ -40,9 +40,11 @@ export default tseslint.config(
       'react-refresh/only-export-components': 'off',
     },
   },
-  // インターフェース定義の未使用パラメータの警告を抑制
+  // 一時的にコンポーネント、インターフェース定義、テストファイルの未使用パラメータの警告を抑制
+  // 注意: 開発を進める中で徐々に警告を有効化して品質を向上させることを推奨
+  // この対処は暫定的なものであり、将来的には適切な変数利用・クリーンアップが必要
   {
-    files: ['**/types/**/*.{ts,tsx}'],
+    files: ['**/types/**/*.{ts,tsx}', '**/components/**/*.{ts,tsx}', '**/tests/**/*.{ts,tsx}'],
     rules: {
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': 'off',

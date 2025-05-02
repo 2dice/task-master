@@ -17,6 +17,9 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { useAppStore } from '@/store';
+import TaskCreator from '@/components/TaskCreator';
+import TaskList from '@/components/TaskList';
+import TaskPool from '@/components/TaskPool';
 
 function App() {
   // Zustandストアから状態とアクションを取得（修正版: useShallowをシミュレート）
@@ -48,15 +51,17 @@ function App() {
             </SheetTrigger>
             <SheetContent
               side="left"
-              className="w-[85vw] sm:w-[400px] md:w-[350px] lg:max-w-sm border-r-2 bg-white p-6"
+              className="w-[85vw] sm:w-[400px] md:w-[350px] lg:max-w-sm border-r-2 bg-white p-6 flex flex-col"
             >
               <SheetTitle>タスク確認・作成</SheetTitle>
               <SheetDescription>タスクの作成・編集・削除ができます</SheetDescription>
-              <div className="h-full flex flex-col mt-6">
-                <div className="flex-grow overflow-auto">
-                  <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                    <p className="text-slate-500">ここにタスク作成UIが入ります</p>
-                  </div>
+              <div className="flex flex-col mt-6 h-[calc(100vh-180px)] overflow-hidden">
+                <div className="overflow-y-auto pb-4">
+                  <TaskCreator />
+                </div>
+                <Separator className="my-4" />
+                <div className="flex-1 overflow-y-auto">
+                  <TaskList />
                 </div>
               </div>
             </SheetContent>
@@ -94,9 +99,7 @@ function App() {
 
         {/* フッター: タスクプールエリア */}
         <div className="h-1/4 md:h-1/5 lg:h-1/4 bg-white p-4 shadow-inner border-t border-slate-200 w-full min-w-full">
-          <div className="h-full w-full border-2 border-dashed border-indigo-200 bg-slate-50 rounded-lg flex items-center justify-center">
-            <p className="text-indigo-400 font-medium">タスクプールエリア</p>
-          </div>
+          <TaskPool />
         </div>
       </div>
     </div>

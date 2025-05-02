@@ -22,7 +22,7 @@
 
 ### Step 1: 開発環境構築とGitHub Pages設定 (done)
 
-**参照が必要な設計情報(view_line_rangeコマンド等で取得)**:
+**参照が必要な設計情報(view_fileコマンド等で取得)**:
 
 - `./AI_Docs/design.md`の下記項(行数範囲はdesign_toc.mdを参照)
   - 4.  技術スタック
@@ -84,7 +84,7 @@ npx playwright install
 
 ### Step 2: 基本レイアウト構築 (done)
 
-**参照が必要な設計情報(view_line_rangeコマンド等で取得)**:
+**参照が必要な設計情報(view_fileコマンド等で取得)**:
 
 - `./AI_Docs/design.md`の下記項(行数範囲はdesign_toc.mdを参照)
   - 2.  UI/UX設計
@@ -154,7 +154,7 @@ npx playwright install
 
 ### Step 3: タスク状態管理 (done)
 
-**参照が必要な設計情報(view_line_rangeコマンド等で取得)**:
+**参照が必要な設計情報(view_fileコマンド等で取得)**:
 
 - `./AI_Docs/design.md`の下記項(行数範囲はdesign_toc.mdを参照)
   - 3.  データモデル設計
@@ -204,9 +204,9 @@ const useAppStore = create<AppState>((set) => ({
 }));
 ```
 
-### Step 4: タスク操作機能
+### Step 4: タスク操作機能 (done)
 
-**参照が必要な設計情報(view_line_rangeコマンド等で取得)**:
+**参照が必要な設計情報(view_fileコマンド等で取得)**:
 
 - `./AI_Docs/design.md`の下記項(行数範囲はdesign_toc.mdを参照)
   - タスク作成・管理フロー
@@ -264,7 +264,7 @@ const TaskCreationForm = () => {
 
 ### Step 5: ドラッグ＆ドロップ基本実装
 
-**参照が必要な設計情報(view_line_rangeコマンド等で取得)**:
+**参照が必要な設計情報(view_fileコマンド等で取得)**:
 
 - `./AI_Docs/design.md`の下記項(行数範囲はdesign_toc.mdを参照)
   - タスクカード
@@ -339,7 +339,7 @@ const DraggableTask = ({ task }) => {
 
 ### Step 6: タイムライン機能
 
-**参照が必要な設計情報(view_line_rangeコマンド等で取得)**:
+**参照が必要な設計情報(view_fileコマンド等で取得)**:
 
 - `./AI_Docs/design.md`の下記項(行数範囲はdesign_toc.mdを参照)
   - 2.3 コンポーネントデザイン
@@ -405,7 +405,7 @@ const Timeline = () => {
 
 ### Step 7: 高度なタスク機能
 
-**参照が必要な設計情報(view_line_rangeコマンド等で取得)**:
+**参照が必要な設計情報(view_fileコマンド等で取得)**:
 
 - `./AI_Docs/design.md`の下記項(行数範囲はdesign_toc.mdを参照)
   - 2.2 レベル設定と各レベルでのゲーム要素
@@ -451,7 +451,7 @@ const checkTaskConditions = (task, layoutTasks) => {
 
 ### Step 8: レベル機能
 
-**参照が必要な設計情報(view_line_rangeコマンド等で取得)**:
+**参照が必要な設計情報(view_fileコマンド等で取得)**:
 
 - `./AI_Docs/design.md`の下記項(行数範囲はdesign_toc.mdを参照)
   - 2.2 レベル設定と各レベルでのゲーム要素
@@ -495,7 +495,7 @@ const filterTasksByLevel = (tasks, level) => {
 
 ### Step 9: アニメーション強化
 
-**参照が必要な設計情報(view_line_rangeコマンド等で取得)**:
+**参照が必要な設計情報(view_fileコマンド等で取得)**:
 
 - `./AI_Docs/design.md`の下記項(行数範囲はdesign_toc.mdを参照)
   - タスクレイアウト操作フロー
@@ -612,7 +612,7 @@ const playTaskDissolveEffect = (element: HTMLElement): void => {
 
 ### Step 10: 保存機能
 
-**参照が必要な設計情報(view_line_rangeコマンド等で取得)**:
+**参照が必要な設計情報(view_fileコマンド等で取得)**:
 
 - `./AI_Docs/design.md`の下記項(行数範囲はdesign_toc.mdを参照)
   - 3.  データモデル設計
@@ -676,7 +676,7 @@ const loadStateFromLocalStorage = () => {
 
 ### Step 11: 仕上げと最終チェック
 
-**参照が必要な設計情報(view_line_rangeコマンド等で取得)**:
+**参照が必要な設計情報(view_fileコマンド等で取得)**:
 
 - `./AI_Docs/design.md`の下記項(行数範囲はdesign_toc.mdを参照)
   - 小学校3年生向けタスク管理ゲーム 設計書

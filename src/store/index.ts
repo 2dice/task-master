@@ -5,14 +5,17 @@ import { AppState, Task } from '@/types';
 const getRandomColor = (): string => {
   const colors = [
     'bg-red-200',
-    'bg-blue-200',
-    'bg-green-200',
-    'bg-yellow-200',
-    'bg-purple-200',
     'bg-pink-200',
+    'bg-purple-200',
     'bg-indigo-200',
-    'bg-orange-200',
+    'bg-blue-200',
+    'bg-cyan-200',
     'bg-teal-200',
+    'bg-green-200',
+    'bg-lime-200',
+    'bg-yellow-200',
+    'bg-amber-200',
+    'bg-orange-200',
   ];
   return colors[Math.floor(Math.random() * colors.length)];
 };
@@ -89,18 +92,20 @@ const useAppStore = create<AppState>((set) => ({
 
   deleteTask: (id: string) =>
     set((state) => ({
-      availableTasks: state.availableTasks.filter((task) => task.id !== id || task.isPreset),
+      availableTasks: state.availableTasks.filter((task) => task.id !== id),
       taskPool: state.taskPool.filter((task) => task.id !== id),
       layoutTasks: state.layoutTasks.filter((task) => task.id !== id),
     })),
 
   moveTaskToPool: (task: Task) =>
     set((state) => {
-      // すでにプールにある場合は追加しない
-      if (state.taskPool.some((t) => t.id === task.id)) {
-        return { taskPool: state.taskPool };
-      }
-      return { taskPool: [...state.taskPool, task] };
+      // タスクのコピーを生成して一意のIDを割り当てる
+      const copiedTask = {
+        ...task,
+        id: `pool-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      };
+
+      return { taskPool: [...state.taskPool, copiedTask] };
     }),
 
   removeTaskFromPool: (id: string) =>

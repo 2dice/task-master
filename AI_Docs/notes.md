@@ -4,7 +4,7 @@
 
 - ステップ開始時
   - `./AI_Docs/step.md`と`./AI_Docs/design.md`の必要な部分だけを読み出すために、`./AI_Docs/step_toc.md`と`./AI_Docs/design_toc.md`で各項目の行数範囲を確認する。
-  - 確認した行数範囲をもとに`./AI_Docs/step.md`の"ステップ概要"と、これから行うステップ±1(step3ならstep2,3,4)の内容をview_line_rangeコマンド等で把握すること。
+  - 確認した行数範囲をもとに`./AI_Docs/step.md`の"ステップ概要"と、これから行うステップ±1(step3ならstep2,3,4)の内容をview_fileコマンド等で把握すること。
   - `./AI_Docs/step.md`に記載されている"参照が必要な設計情報"は、`./AI_Docs/design_toc.md`で確認した行数範囲をもとに`./AI_Docs/design.md`の必要な項目だけ取得すること。
 - ステップ実行中
   - `npm run dev`実行前に、導入済みであればlint、formatter、テストを実行する。

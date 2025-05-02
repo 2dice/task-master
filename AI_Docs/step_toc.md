@@ -4,7 +4,7 @@ File: AI_Docs/step.md
 ## 詳細計画 (StartLine=20, EndLine=700)
 ### Step 1: 開発環境構築とGitHub Pages設定 (done) (StartLine=22, EndLine=83)
 ### Step 2: 基本レイアウト構築 (done) (StartLine=84, EndLine=153)
-### Step 3: タスク状態管理 (StartLine=154, EndLine=205)
+### Step 3: タスク状態管理 (done) (StartLine=154, EndLine=205)
 ### Step 4: タスク操作機能 (StartLine=206, EndLine=263)
 ### Step 5: ドラッグ＆ドロップ基本実装 (StartLine=264, EndLine=338)
 ### Step 6: タイムライン機能 (StartLine=339, EndLine=404)
