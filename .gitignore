@@ -32,7 +32,6 @@ package-lock.json
 *.njsproj
 *.sln
 *.sw?
-.windsurfrules
 
 # テスト関連
 /test-results/

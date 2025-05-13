@@ -15,12 +15,15 @@ export default defineConfig({
   testDir: './tests/e2e',
   /* Run tests in files in parallel */
   fullyParallel: true,
+  /* テストのランダム実行を無効化 - テストの順序依存性を防ぐ */
+  globalSetup: './tests/global-setup.ts', // グローバルセットアップの設定ファイルを指定
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
+  /* ワーカー数 - パフォーマンス最適化のために明示的に設定 */
+  workers: process.env.CI ? 1 : 2, // CIでは1、開発時は2ワーカーに設定
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
@@ -29,11 +32,21 @@ export default defineConfig({
     baseURL: 'http://localhost:5173',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
+    /* トレース収集 - パフォーマンス向上のため失敗時のみ収集 */
     trace: 'on-first-retry',
 
-    /* タイムアウト設定の最適化 */
-    actionTimeout: 10000,
-    navigationTimeout: 10000,
+    /* タイムアウト設定の最適化 - 速度改善のために短縮 */
+    actionTimeout: 5000,
+    navigationTimeout: 5000,
+
+    /* パフォーマンス最適化のための設定 */
+    launchOptions: {
+      slowMo: 0, // テスト実行を遅延させない
+    },
+    /* 不要なリソースのロードをブロック */
+    context: {
+      serviceWorkers: 'block', // サービスワーカーをブロックして高速化
+    },
   },
 
   /* Configure projects for major browsers */

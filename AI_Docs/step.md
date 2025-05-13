@@ -262,7 +262,7 @@ const TaskCreationForm = () => {
 };
 ```
 
-### Step 5: ドラッグ＆ドロップ基本実装
+### Step 5: ドラッグ＆ドロップ基本実装 (done)
 
 **参照が必要な設計情報(view_fileコマンド等で取得)**:
 

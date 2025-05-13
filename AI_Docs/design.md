@@ -305,21 +305,29 @@ layoutTasks: [
 │   │   └── gsap/          # GSAPアニメーション
 │   ├── App.tsx            # アプリケーションコンポーネント
 │   └── main.tsx           # エントリーポイント
+├── tailwind.config.js     # Tailwind CSS設定
+├── test-debug/            # テストデバッグディレクトリ
+├── test-results/          # テスト結果出力ディレクトリ
 ├── tests/                 # テスト
 │   ├── e2e/               # E2Eテスト (Playwright)
+│   │   ├── app.spec.ts     # メインのE2Eテスト
+│   │   ├── backup/         # 使用していない古いテストファイルのバックアップ
+│   │   └── global-setup.ts # Playwrightのグローバルセットアップ
 │   └── unit/              # ユニットテスト
+│       └── conditionCheck.test.ts # 条件チェック機能のユニットテスト
+├── tsconfig.app.json     # TypeScriptアプリ用設定
+├── tsconfig.json         # TypeScript基本設定
+├── tsconfig.node.json    # TypeScript Node環境用設定
+├── vite.config.ts         # Vite設定
 ├── .eslintrc.config.js    # ESLint設定
+├── .gitignore            # Git無視ファイル設定
+├── .prettierignore       # Prettier無視設定
 ├── .prettierrc            # Prettier設定
 ├── components.json        # shadcn/ui設定
 ├── index.html             # HTMLテンプレート
 ├── package.json           # パッケージ設定
 ├── playwright.config.ts   # Playwright設定
 ├── postcss.config.js      # PostCSS設定
-├── tailwind.config.js     # Tailwind CSS設定
-├── tsconfig.json          # TypeScript設定
-├── tsconfig.app.json      # TypeScript App設定
-├── tsconfig.node.json     # TypeScript Node設定
-├── vite.config.ts         # Vite設定
 └── README.md              # プロジェクト説明
 ```
 
