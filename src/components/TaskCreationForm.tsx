@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAppStore, getRandomColor } from '@/store';
+import { AppState } from '@/types';
+import useAppStore from '@/store';
+import { getRandomColor } from '@/lib/utils';
 
 const TaskCreationForm = () => {
   const [name, setName] = useState('');
   const [duration, setDuration] = useState(5);
-  const addTask = useAppStore((state) => state.addTask);
+  const addTask = useAppStore((state: AppState) => state.addTask);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

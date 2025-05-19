@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAppStore } from '@/store';
+import useAppStore from '@/store';
 import { Task } from '@/types';
 import TaskEditModal from './TaskEditModal';
 

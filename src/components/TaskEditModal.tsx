@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAppStore } from '@/store';
+import useAppStore from '@/store';
 import { Task } from '@/types';
 
 // 所要時間のプリセット（分）

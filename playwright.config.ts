@@ -16,7 +16,7 @@ export default defineConfig({
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* テストのランダム実行を無効化 - テストの順序依存性を防ぐ */
-  globalSetup: './tests/global-setup.ts', // グローバルセットアップの設定ファイルを指定
+  globalSetup: './tests/e2e/global-setup.ts', // グローバルセットアップの設定ファイルを指定
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */

@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { useAppStore } from '@/store';
+import useAppStore from '@/store';
 import { Task } from '@/types';
 import TaskCreator from '@/components/TaskCreator';
 import TaskList from '@/components/TaskList';
@@ -177,15 +177,8 @@ function App() {
         removeTaskFromPool(taskData.id);
 
         // 2. タスクをレイアウトに追加
-        // レイアウト用に必要なプロパティを追加
-        const layoutTask = {
-          ...taskData,
-          startTime: 0, // 開始位置は0分から
-          endTime: taskData.duration1, // 終了位置は所要時間分
-        };
-
-        addTaskToLayout(layoutTask);
-        console.log('タスクをレイアウトに移動しました:', layoutTask);
+        addTaskToLayout(taskData);
+        console.log('タスクをレイアウトに移動しました:', taskData);
       }
     }
   };
@@ -269,11 +262,7 @@ function App() {
 
           // 条件が満たされているので、ここでタスクを移動する
           state.removeTaskFromPool(task.id);
-          state.addTaskToLayout({
-            ...task,
-            startTime: 0,
-            endTime: task.duration1,
-          });
+          state.addTaskToLayout(task);
 
           return { success: true, message: 'Task moved to layout' };
         }
@@ -285,11 +274,7 @@ function App() {
 
       // 条件が満たされていれば移動
       state.removeTaskFromPool(task.id);
-      state.addTaskToLayout({
-        ...task,
-        startTime: 0,
-        endTime: task.duration1,
-      });
+      state.addTaskToLayout(task);
       return { success: true, message: 'Task moved to layout' };
     };
 

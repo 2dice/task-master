@@ -260,6 +260,7 @@ layoutTasks: [
 
 - **リンター/フォーマッター**: ESLint + Prettier
 - **E2Eテスト**: Playwright
+- **ユニットテスト**: Vitest
 
 ### 4.3 デプロイ・ホスティング
 
@@ -311,7 +312,6 @@ layoutTasks: [
 ├── tests/                 # テスト
 │   ├── e2e/               # E2Eテスト (Playwright)
 │   │   ├── app.spec.ts     # メインのE2Eテスト
-│   │   ├── backup/         # 使用していない古いテストファイルのバックアップ
 │   │   └── global-setup.ts # Playwrightのグローバルセットアップ
 │   └── unit/              # ユニットテスト
 │       └── conditionCheck.test.ts # 条件チェック機能のユニットテスト

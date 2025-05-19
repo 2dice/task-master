@@ -337,7 +337,7 @@ const DraggableTask = ({ task }) => {
 };
 ```
 
-### Step 6: タイムライン機能
+### Step 6: タイムライン機能 (done)
 
 **参照が必要な設計情報(view_fileコマンド等で取得)**:
 

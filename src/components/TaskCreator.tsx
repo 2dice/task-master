@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAppStore } from '@/store';
+import useAppStore from '@/store';
 
 // 所要時間のプリセット（分）
 const DURATION_PRESETS = [1, 3, 5, 10, 15, 20, 30, 45, 60, 90, 120];

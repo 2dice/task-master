@@ -1,24 +1,5 @@
 import { create } from 'zustand';
-import { AppState, Task } from '@/types';
-
-// ランダムな色を生成する関数
-const getRandomColor = (): string => {
-  const colors = [
-    'bg-red-200',
-    'bg-pink-200',
-    'bg-purple-200',
-    'bg-indigo-200',
-    'bg-blue-200',
-    'bg-cyan-200',
-    'bg-teal-200',
-    'bg-green-200',
-    'bg-lime-200',
-    'bg-yellow-200',
-    'bg-amber-200',
-    'bg-orange-200',
-  ];
-  return colors[Math.floor(Math.random() * colors.length)];
-};
+import { AppState, Task, LayoutTask } from '@/types';
 
 // プリセットタスク一覧
 const presetTasks: Task[] = [
@@ -113,10 +94,36 @@ const useAppStore = create<AppState>((set) => ({
       taskPool: state.taskPool.filter((task) => task.id !== id),
     })),
 
-  addTaskToLayout: (task) =>
-    set((state) => ({
-      layoutTasks: [...state.layoutTasks, task],
-    })),
+  addTaskToLayout: (taskToAdd: Task) =>
+    set((state) => {
+      // 最後に配置されたタスクを取得
+      const lastLayoutTask =
+        state.layoutTasks.length > 0 ? state.layoutTasks[state.layoutTasks.length - 1] : null;
+
+      // 最後にタスクがあればその終了時刻、なければ0
+      // TODO: 待ち時間タスク(duration2があるタスク)の場合、lastLayoutTask.phase2StartTimeも考慮する必要があるか確認
+      const startTime = lastLayoutTask ? lastLayoutTask.endTime : 0;
+
+      // 新しいタスクの終了時間を計算 (まずはduration1のみ考慮)
+      const endTime = startTime + taskToAdd.duration1;
+
+      // 新しいタスクの行インデックスを計算 (現在のタスク数がそのまま次の行インデックスになる)
+      const rowIndex = state.layoutTasks.length;
+
+      // 新しいLayoutTaskオブジェクトを作成
+      const newLayoutTask: LayoutTask = {
+        ...taskToAdd,
+        startTime,
+        endTime,
+        rowIndex,
+        // waitEndTime や phase2StartTime は今後のステップで対応
+      };
+
+      const newState = {
+        layoutTasks: [...state.layoutTasks, newLayoutTask],
+      };
+      return newState;
+    }),
 
   removeTaskFromLayout: (id: string) =>
     set((state) => ({
@@ -129,6 +136,45 @@ const useAppStore = create<AppState>((set) => ({
         task.id === id ? { ...task, ...updates } : task
       ),
     })),
+
+  // 新しいアクション：タイムラインからタスクを削除し、タスクプールに追加
+  removeTaskFromLayoutAndAddToPool: (taskId: string) =>
+    set((state) => {
+      // 対象タスクを取得
+      const targetTask = state.layoutTasks.find((t) => t.id === taskId);
+      if (!targetTask) return state;
+
+      // 対象タスク以降のタスクを一括解除
+      const removedTasks = state.layoutTasks.filter((t) => t.rowIndex >= targetTask.rowIndex);
+
+      // 残すタスク
+      const remainingTasks = state.layoutTasks.filter((t) => t.rowIndex < targetTask.rowIndex);
+
+      // rowIndex / startTime / endTime を詰め直す
+      let currentStart = 0;
+      const updatedLayoutTasks: LayoutTask[] = remainingTasks.map((t, idx) => {
+        const newTask: LayoutTask = {
+          ...t,
+          rowIndex: idx,
+          startTime: currentStart,
+          endTime: currentStart + t.duration1,
+        };
+        currentStart = newTask.endTime;
+        return newTask;
+      });
+
+      // プールへ戻すタスクを Task 型に変換し追加
+      /* eslint-disable @typescript-eslint/no-unused-vars, no-unused-vars */
+      const tasksForPool: Task[] = removedTasks.map(
+        ({ startTime: _st, endTime: _et, rowIndex: _ri, ...rest }) => rest
+      );
+      /* eslint-enable @typescript-eslint/no-unused-vars, no-unused-vars */
+
+      return {
+        layoutTasks: updatedLayoutTasks,
+        taskPool: [...state.taskPool, ...tasksForPool],
+      };
+    }),
 }));
 
-export { useAppStore, getRandomColor };
+export default useAppStore;

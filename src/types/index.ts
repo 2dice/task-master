@@ -29,6 +29,7 @@ export interface Task {
 export interface LayoutTask extends Task {
   startTime: number; // 開始時間（分）
   endTime: number; // 終了時間（分）
+  rowIndex: number; // 何行目のタスクか (0から始まる)
   waitEndTime?: number; // 待ち時間終了時間（分）
   phase2StartTime?: number; // 所要時間2の開始時間（分）
 }
@@ -53,7 +54,8 @@ export interface AppState {
   deleteTask: (_id: string) => void;
   moveTaskToPool: (_task: Task) => void;
   removeTaskFromPool: (_id: string) => void;
-  addTaskToLayout: (_task: LayoutTask) => void;
+  addTaskToLayout: (_task: Task) => void; // LayoutTaskからTaskへ変更
   removeTaskFromLayout: (_id: string) => void;
   updateLayoutTask: (_id: string, _updates: Partial<LayoutTask>) => void;
+  removeTaskFromLayoutAndAddToPool: (_taskId: string) => void; // 追加
 }
