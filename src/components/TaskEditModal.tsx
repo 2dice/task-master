@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import useAppStore from '@/store';
@@ -32,8 +32,17 @@ const TaskEditModal = ({ task, onClose }: TaskEditModalProps) => {
   const [name, setName] = useState('');
   const [duration, setDuration] = useState(5);
   const [color, setColor] = useState('');
+  const [condition, setCondition] = useState('');
+  const [waitDuration, setWaitDuration] = useState(0);
+  const [duration2, setDuration2] = useState(0);
   const updateTask = useAppStore((state) => state.updateTask);
   const deleteTask = useAppStore((state) => state.deleteTask);
+  const availableTasks = useAppStore((state) => state.availableTasks);
+
+  const availableTaskNames = useMemo(
+    () => Array.from(new Set(availableTasks.map((t) => t.name))),
+    [availableTasks]
+  );
 
   // タスクが変更されたら状態を更新
   useEffect(() => {
@@ -41,6 +50,9 @@ const TaskEditModal = ({ task, onClose }: TaskEditModalProps) => {
       setName(task.name);
       setDuration(task.duration1);
       setColor(task.color);
+      setCondition(task.condition ?? '');
+      setWaitDuration(task.waitTime?.duration ?? 0);
+      setDuration2(task.duration2 ?? 0);
     }
   }, [task]);
 
@@ -60,6 +72,24 @@ const TaskEditModal = ({ task, onClose }: TaskEditModalProps) => {
       name: name.trim(),
       duration1: duration,
       color: color,
+      condition: condition.trim() || undefined,
+      waitTime:
+        waitDuration > 0
+          ? {
+              duration: waitDuration,
+            }
+          : undefined,
+      duration2: duration2 > 0 ? duration2 : undefined,
+    });
+
+    // レイアウトに同IDタスクがあれば更新
+    useAppStore.getState().updateLayoutTask(task.id, {
+      name: name.trim(),
+      duration1: duration,
+      color: color,
+      condition: condition.trim() || undefined,
+      waitTime: waitDuration > 0 ? { duration: waitDuration } : undefined,
+      duration2: duration2 > 0 ? duration2 : undefined,
     });
 
     console.log('タスクを更新しました:', {
@@ -140,6 +170,56 @@ const TaskEditModal = ({ task, onClose }: TaskEditModalProps) => {
                   onClick={() => setColor(colorOption)}
                 />
               ))}
+            </div>
+          </div>
+
+          {/* 条件タスク名入力 */}
+          <div>
+            <label htmlFor="edit-task-condition" className="block text-sm text-gray-600 mb-1">
+              前提タスク (オプション)
+            </label>
+            <select
+              id="edit-task-condition"
+              value={condition}
+              onChange={(e) => setCondition(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="">なし</option>
+              {availableTaskNames.map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* 待ち時間 / duration2 */}
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label htmlFor="edit-task-wait" className="block text-sm text-gray-600 mb-1">
+                待ち時間 (分)
+              </label>
+              <input
+                id="edit-task-wait"
+                type="number"
+                min="0"
+                value={waitDuration}
+                onChange={(e) => setWaitDuration(parseInt(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            <div>
+              <label htmlFor="edit-task-duration2" className="block text-sm text-gray-600 mb-1">
+                所要時間2 (分)
+              </label>
+              <input
+                id="edit-task-duration2"
+                type="number"
+                min="0"
+                value={duration2}
+                onChange={(e) => setDuration2(parseInt(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
             </div>
           </div>
 

@@ -52,23 +52,31 @@ function App() {
     const conditionTaskId = task.condition;
     console.log('条件タスクID:', conditionTaskId);
 
-    // レイアウト内に条件タスクがあるか確認
-    // ID比較に注意: conditionTaskIdが名前やプリセットIDの場合は部分一致でチェック
-    const conditionTask = useAppStore.getState().layoutTasks.find((layoutTask) => {
-      const match =
-        layoutTask.id === conditionTaskId ||
-        layoutTask.id.includes(conditionTaskId) ||
-        conditionTaskId.includes(layoutTask.id);
-      console.log(`ID比較: ${layoutTask.id} vs ${conditionTaskId} = ${match}`);
-      return match;
-    });
+    // 全タスクリストを取得（名前表示用）
+    const { layoutTasks, availableTasks, taskPool } = useAppStore.getState();
+
+    // レイアウト内に条件タスクがあるか確認 (ID一致 or 名前一致, 部分一致も許容)
+    const isMatch = (value: string, target: string) =>
+      value === target || value.includes(target) || target.includes(value);
+
+    const conditionTask = layoutTasks.find(
+      (layoutTask) =>
+        isMatch(layoutTask.id, conditionTaskId) || isMatch(layoutTask.name, conditionTaskId)
+    );
+
+    // 名前解決用
+    const allTasks = [...layoutTasks, ...availableTasks, ...taskPool];
+    const referencedTask = allTasks.find(
+      (t) => isMatch(t.id, conditionTaskId) || isMatch(t.name, conditionTaskId)
+    );
+    const conditionTaskName = referencedTask ? referencedTask.name : conditionTaskId;
 
     // 条件タスクがレイアウトにない場合はエラー
     if (!conditionTask) {
       console.log('条件タスクがレイアウトに存在しない: 判定結果=false');
       return {
         valid: false,
-        message: `このタスクは先に${task.condition}が必要です！`,
+        message: `このタスクは先に「${conditionTaskName}」が必要です！`,
       };
     }
 

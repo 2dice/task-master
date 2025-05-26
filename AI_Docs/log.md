@@ -385,3 +385,29 @@
 1. **コンテナにposition: relative、タスク要素にabsolute配置で自由度を確保**
 2. **タイムライン幅設定は`container.style.width = totalDuration*unit + "px"`で実現**
 3. **隣接タスク結合時のスタイル調整は一つの要素を長い幅で描画するか、マージ要素を作成で対応**
+
+## Step 7: 高度なタスク機能 (2025-05-26)
+
+### うまくいった手法（手順）
+
+1. **条件付きタスク配置機能の統合**
+   - checkTaskCondition を addTaskToLayout に組み込み、前提条件未達時に配置を拒否
+2. **待ち時間タスクのサポート**
+   - duration1, waitTime, duration2 をデータモデルに追加し、タイムライン上で表示
+   - 待ち時間領域を薄色＋点線で表現
+3. **phase2タスク自動配置ロジック**
+   - placePhase2 関数で phase2StartTime 計算後にレイアウトTasksへ追加
+4. **配置エラー時のフィードバック**
+   - TaskLayout コンポーネントでエラーメッセージを表示
+   - ドロップ位置を元に戻し、再試行を促す UI を提供
+
+### 汎用的なナレッジ
+
+- UI とロジックは Zustand ストアに集約し、バリデーションは一箇所で完結
+- 非同期 phase2 制御は setTimeout で実装し、複数待ちタスクにも対応
+
+### 具体的なナレッジ（ツールやポイント）
+
+- TypeScript 型定義に `waitTime?: { duration: number; variance?: number }` を追加
+- phase2 自動追加は placePhase2 で setTimeout を使用
+- 配置エラーのハンドリングは TaskLayout の state.error で実装し、UIでリセット処理を行う

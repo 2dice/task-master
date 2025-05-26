@@ -20,11 +20,21 @@ const TaskItem = ({ task, onEdit }: { task: Task; onEdit: (task: Task) => void }
         onClick={() => onEdit(task)}
       >
         <h3 className="font-medium text-sm text-gray-800">{task.name}</h3>
-        <div className="flex justify-between items-center mt-1">
-          <span className="text-xs text-gray-600">{task.duration1}分</span>
+        <div className="flex flex-wrap justify-between items-center mt-1 gap-1 text-xs">
+          <span className="text-gray-600">{task.duration1}分</span>
+          {task.waitTime && task.waitTime.duration > 0 && (
+            <span className="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded">
+              待{task.waitTime.duration}分
+            </span>
+          )}
+          {task.duration2 && task.duration2 > 0 && (
+            <span className="bg-teal-100 text-teal-800 px-1.5 py-0.5 rounded">
+              ②{task.duration2}分
+            </span>
+          )}
           {task.condition && (
-            <span className="text-xs bg-orange-100 text-orange-800 px-1.5 py-0.5 rounded">
-              条件あり
+            <span className="bg-orange-100 text-orange-800 px-1.5 py-0.5 rounded">
+              条件: {task.condition}
             </span>
           )}
         </div>
@@ -48,7 +58,7 @@ const TaskList = () => {
   return (
     <div className="h-full">
       <h3 className="font-medium text-sm mb-2 text-indigo-700">利用可能なタスク</h3>
-      <div className="pr-2">
+      <div id="task-list-scroll" className="pr-2 overflow-y-auto max-h-[60vh]">
         {availableTasks.length > 0 ? (
           availableTasks.map((task) => (
             <TaskItem key={task.id} task={task} onEdit={setEditingTask} />

@@ -32,6 +32,7 @@ export interface LayoutTask extends Task {
   rowIndex: number; // 何行目のタスクか (0から始まる)
   waitEndTime?: number; // 待ち時間終了時間（分）
   phase2StartTime?: number; // 所要時間2の開始時間（分）
+  phase2Placed?: boolean; // 所要時間2が配置済みかどうか
 }
 
 /**
@@ -45,6 +46,7 @@ export interface AppState {
   layoutTasks: LayoutTask[]; // レイアウト配置済みタスク
   showSideMenu: boolean; // サイドメニュー表示状態
   showingInterruption: boolean; // 割り込みタスク表示中か
+  error: string | null; // 最新エラーメッセージ
 
   // アクション
   setLevel: (_level: 1 | 2 | 3 | 4 | 5) => void;
@@ -58,4 +60,6 @@ export interface AppState {
   removeTaskFromLayout: (_id: string) => void;
   updateLayoutTask: (_id: string, _updates: Partial<LayoutTask>) => void;
   removeTaskFromLayoutAndAddToPool: (_taskId: string) => void; // 追加
+  placePhase2: (_taskId: string) => void; // waitタスク後半配置
+  clearError: () => void; // エラークリア
 }

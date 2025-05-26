@@ -290,11 +290,13 @@ layoutTasks: [
 │   ├── assets/            # 画像、フォントなど
 │   ├── components/        # Reactコンポーネント
 │   │   ├── ui/            # shadcn/uiコンポーネント
-│   │   ├── common/        # 共通コンポーネント
+│   │   ├── drag/          # dnd-kit ドラッグ&ドロップ関連
 │   │   ├── LevelSelector/ # レベル選択コンポーネント
-│   │   ├── TaskCreator/   # タスク作成コンポーネント
-│   │   ├── TaskLayout/    # タスクレイアウトコンポーネント
-│   │   └── TaskPool/      # タスクプールコンポーネント
+│   │   ├── TaskCreator.tsx   # タスク作成コンポーネント
+│   │   ├── TaskLayout.tsx    # タスクレイアウトコンポーネント
+│   │   ├── TaskPool.tsx      # タスクプールコンポーネント
+│   │   ├── TaskList.tsx      # タスク確認リストコンポーネント
+│   │   └── Timeline.tsx      # タイムラインコンポーネント
 │   ├── hooks/             # カスタムフック
 │   ├── lib/               # ユーティリティ関数やサードパーティライブラリ統合
 │   │   ├── utils.ts       # 一般的なユーティリティ関数
@@ -311,10 +313,13 @@ layoutTasks: [
 ├── test-results/          # テスト結果出力ディレクトリ
 ├── tests/                 # テスト
 │   ├── e2e/               # E2Eテスト (Playwright)
-│   │   ├── app.spec.ts     # メインのE2Eテスト
+│   │   ├── app.spec.ts          # アプリ全体のE2Eテスト
+│   │   ├── timeline.spec.ts     # タイムライン機能のE2Eテスト
 │   │   └── global-setup.ts # Playwrightのグローバルセットアップ
 │   └── unit/              # ユニットテスト
-│       └── conditionCheck.test.ts # 条件チェック機能のユニットテスト
+│       ├── conditionCheck.test.ts # 条件チェック機能のユニットテスト
+│       ├── conditionPlacementStore.test.ts # 条件付き配置ストア
+│       └── waitTaskPlacement.test.ts       # 待ち時間タスク配置
 ├── tsconfig.app.json     # TypeScriptアプリ用設定
 ├── tsconfig.json         # TypeScript基本設定
 ├── tsconfig.node.json    # TypeScript Node環境用設定

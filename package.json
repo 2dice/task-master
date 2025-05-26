@@ -12,7 +12,7 @@
     "lint:fix": "eslint . --fix",
     "preview": "vite preview",
     "test": "npm run test:unit && npm run test:e2e",
-    "test:unit": "npx vitest run tests/unit/conditionCheck.test.ts",
+    "test:unit": "npx vitest run tests/unit",
     "test:e2e": "npx playwright test",
     "test:ui": "playwright test --ui"
   },

@@ -8,7 +8,7 @@ File: AI_Docs/step.md
 ### Step 4: タスク操作機能 (done) (StartLine=206, EndLine=263)
 ### Step 5: ドラッグ＆ドロップ基本実装 (done) (StartLine=264, EndLine=338)
 ### Step 6: タイムライン機能 (done) (StartLine=339, EndLine=404)
-### Step 7: 高度なタスク機能 (StartLine=405, EndLine=450)
+### Step 7: 高度なタスク機能 (done) (StartLine=405, EndLine=450)
 ### Step 8: レベル機能 (StartLine=451, EndLine=494)
 ### Step 9: アニメーション強化 (StartLine=495, EndLine=611)
 ### Step 10: 保存機能 (StartLine=612, EndLine=675)

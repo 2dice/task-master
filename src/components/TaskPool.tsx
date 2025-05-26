@@ -34,8 +34,23 @@ const TaskPool = () => {
               <Card className={`${task.color} border-0 shadow-sm`}>
                 <CardContent className="p-3 flex flex-col">
                   <h3 className="font-medium text-sm text-gray-800 truncate">{task.name}</h3>
-                  <div className="mt-auto pt-1">
+                  <div className="mt-auto pt-1 flex flex-wrap gap-1">
                     <span className="text-xs text-gray-600">{task.duration1}分</span>
+                    {task.waitTime?.duration && task.waitTime.duration > 0 && (
+                      <span className="text-[10px] bg-indigo-100 text-indigo-800 px-1 py-0.5 rounded">
+                        待:{task.waitTime.duration}
+                      </span>
+                    )}
+                    {task.duration2 && task.duration2 > 0 && (
+                      <span className="text-[10px] bg-purple-100 text-purple-800 px-1 py-0.5 rounded">
+                        後:{task.duration2}
+                      </span>
+                    )}
+                    {task.condition && (
+                      <span className="text-[10px] bg-orange-100 text-orange-800 px-1 py-0.5 rounded">
+                        条:{task.condition}
+                      </span>
+                    )}
                   </div>
                 </CardContent>
               </Card>

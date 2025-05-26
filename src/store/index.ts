@@ -41,7 +41,7 @@ const presetTasks: Task[] = [
 ];
 
 // Zustandストアの作成
-const useAppStore = create<AppState>((set) => ({
+const useAppStore = create<AppState>((set, get) => ({
   // 初期状態
   level: 1,
   availableTasks: [...presetTasks],
@@ -49,6 +49,7 @@ const useAppStore = create<AppState>((set) => ({
   layoutTasks: [],
   showSideMenu: false,
   showingInterruption: false,
+  error: null, // 最新エラーメッセージ
 
   // アクション
   setLevel: (level) => set({ level }),
@@ -96,18 +97,51 @@ const useAppStore = create<AppState>((set) => ({
 
   addTaskToLayout: (taskToAdd: Task) =>
     set((state) => {
-      // 最後に配置されたタスクを取得
-      const lastLayoutTask =
-        state.layoutTasks.length > 0 ? state.layoutTasks[state.layoutTasks.length - 1] : null;
+      // 既存タスクを考慮して開始時刻を決定
+      // 1. phase2未配置の待ち時間タスクが存在する場合 → その待ち時間開始(phase1終了)以降に配置
+      // 2. それ以外 → すべてのタスクの endTime 以降に配置
 
-      // 最後にタスクがあればその終了時刻、なければ0
-      // TODO: 待ち時間タスク(duration2があるタスク)の場合、lastLayoutTask.phase2StartTimeも考慮する必要があるか確認
-      const startTime = lastLayoutTask ? lastLayoutTask.endTime : 0;
+      const candidateTimes = state.layoutTasks.map((t) => {
+        if (t.waitEndTime !== undefined && !t.phase2Placed) {
+          return t.startTime + t.duration1; // 待ち時間開始時刻
+        }
+        return t.endTime; // 通常はタスク終了時刻
+      });
 
-      // 新しいタスクの終了時間を計算 (まずはduration1のみ考慮)
-      const endTime = startTime + taskToAdd.duration1;
+      const startTime = candidateTimes.length > 0 ? Math.max(...candidateTimes) : 0;
 
-      // 新しいタスクの行インデックスを計算 (現在のタスク数がそのまま次の行インデックスになる)
+      /* --------------------------------------------------
+       * 待ち時間・phase2 対応ロジック
+       * -------------------------------------------------- */
+      const duration1 = taskToAdd.duration1;
+      const waitDuration = taskToAdd.waitTime?.duration ?? 0;
+
+      // 所要時間1の終了時刻
+      const waitStartTime = startTime + duration1;
+      // 待ち時間終了時刻（設定がある場合）
+      const waitEndTime = waitDuration > 0 ? waitStartTime + waitDuration : undefined;
+      // phase2 はまだ配置しない
+      const phase2StartTime = undefined;
+      // タスク全体の終了時刻 (phase2 未配置なので含めない)
+      const endTime = startTime + duration1 + waitDuration;
+      /* -------------------------------------------------- */
+
+      // 条件一致は名前でも ID でも許容
+      const isMatch = (v: string, target: string) =>
+        v === target || v.includes(target) || target.includes(v);
+
+      if (taskToAdd.condition) {
+        const condMet = get().layoutTasks.some(
+          (lt: LayoutTask) =>
+            isMatch(lt.id, taskToAdd.condition!) || isMatch(lt.name, taskToAdd.condition!)
+        );
+        if (!condMet) {
+          console.warn('条件未満で配置不可');
+          return { error: '条件を満たしていないため配置できません💦' };
+        }
+      }
+
+      // 新しいタスクの行インデックスを計算
       const rowIndex = state.layoutTasks.length;
 
       // 新しいLayoutTaskオブジェクトを作成
@@ -116,13 +150,14 @@ const useAppStore = create<AppState>((set) => ({
         startTime,
         endTime,
         rowIndex,
-        // waitEndTime や phase2StartTime は今後のステップで対応
+        waitEndTime,
+        phase2StartTime,
+        phase2Placed: false,
       };
 
-      const newState = {
+      return {
         layoutTasks: [...state.layoutTasks, newLayoutTask],
       };
-      return newState;
     }),
 
   removeTaskFromLayout: (id: string) =>
@@ -144,24 +179,40 @@ const useAppStore = create<AppState>((set) => ({
       const targetTask = state.layoutTasks.find((t) => t.id === taskId);
       if (!targetTask) return state;
 
-      // 対象タスク以降のタスクを一括解除
-      const removedTasks = state.layoutTasks.filter((t) => t.rowIndex >= targetTask.rowIndex);
+      // 解除開始時間
+      const removalStart = targetTask.startTime;
 
-      // 残すタスク
-      const remainingTasks = state.layoutTasks.filter((t) => t.rowIndex < targetTask.rowIndex);
+      const removedTasks: LayoutTask[] = [];
+      const keptTasks: LayoutTask[] = [];
 
-      // rowIndex / startTime / endTime を詰め直す
-      let currentStart = 0;
-      const updatedLayoutTasks: LayoutTask[] = remainingTasks.map((t, idx) => {
-        const newTask: LayoutTask = {
-          ...t,
-          rowIndex: idx,
-          startTime: currentStart,
-          endTime: currentStart + t.duration1,
-        };
-        currentStart = newTask.endTime;
-        return newTask;
+      state.layoutTasks.forEach((t) => {
+        if (t.startTime >= removalStart) {
+          // まるごと解除
+          removedTasks.push(t);
+          return;
+        }
+
+        // phase2 が removalStart 以降なら phase2 をリセット
+        if (
+          t.phase2Placed &&
+          t.phase2StartTime !== undefined &&
+          t.phase2StartTime >= removalStart
+        ) {
+          const newEnd = t.waitEndTime ?? t.startTime + t.duration1;
+          keptTasks.push({
+            ...t,
+            phase2Placed: false,
+            phase2StartTime: undefined,
+            endTime: newEnd,
+          });
+          return;
+        }
+
+        keptTasks.push(t);
       });
+
+      // 行インデックスを詰め直す
+      const updatedLayoutTasks = keptTasks.map((t, idx) => ({ ...t, rowIndex: idx }));
 
       // プールへ戻すタスクを Task 型に変換し追加
       /* eslint-disable @typescript-eslint/no-unused-vars, no-unused-vars */
@@ -175,6 +226,43 @@ const useAppStore = create<AppState>((set) => ({
         taskPool: [...state.taskPool, ...tasksForPool],
       };
     }),
+
+  // 待ち時間タスクの後半を配置
+  placePhase2: (taskId: string) =>
+    set((state) => {
+      const targetIndex = state.layoutTasks.findIndex((t) => t.id === taskId);
+      if (targetIndex === -1) return {};
+
+      const target = state.layoutTasks[targetIndex];
+
+      if (!target.duration2 || target.phase2Placed) return {};
+
+      const lastTaskEnd = state.layoutTasks.reduce(
+        (max, t) => (t.id === target.id ? max : Math.max(max, t.endTime)),
+        0
+      );
+
+      // phase2 は待ち時間終了以降、かつ他タスク終了後に配置
+      const phase2Start = Math.max(target.waitEndTime ?? target.startTime, lastTaskEnd);
+
+      const updatedTarget: LayoutTask = {
+        ...target,
+        phase2Placed: true,
+        phase2StartTime: phase2Start,
+        startTime: target.startTime, // phase1 start 変わらず
+        endTime: phase2Start + target.duration2,
+      };
+
+      // 他タスクは変更なし
+      const newLayoutTasks = [...state.layoutTasks];
+      newLayoutTasks[targetIndex] = updatedTarget;
+
+      return { layoutTasks: newLayoutTasks };
+    }),
+
+  // エラー操作
+  setError: (msg: string) => set({ error: msg }),
+  clearError: () => set({ error: null }),
 }));
 
 export default useAppStore;
