@@ -173,12 +173,12 @@ const Timeline: React.FC<TimelineProps> = ({ tasks }) => {
             </div>
           );
 
-          // 2. 待ち時間
-          if (
-            task.waitEndTime !== undefined &&
-            task.waitEndTime > task.startTime + task.duration1
-          ) {
-            const waitMinutes = task.waitEndTime - (task.startTime + task.duration1);
+          // 2. 待ち時間: phase2開始まで表示を伸ばす
+          if (task.waitEndTime !== undefined && task.duration2) {
+            const waitStart = task.startTime + task.duration1;
+            // phase2未配置時は設定waitEndTime, 配置済時はphase2StartTime
+            const waitEnd = task.phase2StartTime ?? task.waitEndTime!;
+            const waitMinutes = waitEnd - waitStart;
             segments.push(
               <div
                 key="wait"
@@ -187,23 +187,6 @@ const Timeline: React.FC<TimelineProps> = ({ tasks }) => {
               >
                 待ち
               </div>
-            );
-          }
-
-          // 2.5 gap (待ち時間後からphase2Startまで)
-          if (
-            task.phase2Placed &&
-            task.phase2StartTime !== undefined &&
-            task.waitEndTime !== undefined &&
-            task.phase2StartTime > task.waitEndTime
-          ) {
-            const gapMinutes = task.phase2StartTime - task.waitEndTime;
-            segments.push(
-              <div
-                key="gap"
-                className="h-full"
-                style={{ width: `${gapMinutes * MINUTE_WIDTH}px` }}
-              />
             );
           }
 

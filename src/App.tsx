@@ -372,7 +372,7 @@ function App() {
 
           <Select
             value={level.toString()}
-            onValueChange={(value) => setLevel(Number(value) as 1 | 2 | 3 | 4 | 5)}
+            onValueChange={(value) => setLevel(Number(value) as 1 | 2 | 3 | 4)}
           >
             <SelectTrigger className="w-[180px] md:w-[220px] lg:w-[280px] bg-white border-slate-200">
               <SelectValue placeholder="レベルを選択" />
@@ -382,7 +382,6 @@ function App() {
               <SelectItem value="2">レベル 2: 条件付きタスク</SelectItem>
               <SelectItem value="3">レベル 3: 待ち時間あり</SelectItem>
               <SelectItem value="4">レベル 4: 複雑な依存関係</SelectItem>
-              <SelectItem value="5">レベル 5: 割り込み対応</SelectItem>
             </SelectContent>
           </Select>
         </header>

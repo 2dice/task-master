@@ -40,16 +40,15 @@ export interface LayoutTask extends Task {
  * アプリ全体の状態を管理する
  */
 export interface AppState {
-  level: 1 | 2 | 3 | 4 | 5; // 現在のレベル
+  level: 1 | 2 | 3 | 4; // 現在のレベル
   availableTasks: Task[]; // 使用可能なタスク一覧
   taskPool: Task[]; // タスクプール内のタスク
   layoutTasks: LayoutTask[]; // レイアウト配置済みタスク
   showSideMenu: boolean; // サイドメニュー表示状態
-  showingInterruption: boolean; // 割り込みタスク表示中か
   error: string | null; // 最新エラーメッセージ
 
   // アクション
-  setLevel: (_level: 1 | 2 | 3 | 4 | 5) => void;
+  setLevel: (_level: 1 | 2 | 3 | 4) => void;
   toggleSideMenu: () => void;
   addTask: (_task: Task) => void;
   updateTask: (_id: string, _updates: Partial<Task>) => void;

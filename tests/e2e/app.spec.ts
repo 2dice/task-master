@@ -91,7 +91,7 @@ test.describe('タスクマスターアプリの基本テスト', () => {
 
     // 選択肢（オプション）が表示されていることを確認
     const options = page.locator('[role="option"]');
-    await expect(options).toHaveCount(5); // 5つのレベル選択肢
+    await expect(options).toHaveCount(4); // 4つのレベル選択肢
 
     // 3. レベル3を選択
     const level3Option = page.locator('[role="option"]').filter({ hasText: 'レベル 3' });
@@ -113,23 +113,6 @@ test.describe('タスクマスターアプリの基本テスト', () => {
     // レベル変更後のZustand状態確認
     const stateAfterLevel3 = await getZustandState(page);
     expect(stateAfterLevel3.level).toBe(3);
-
-    // 5. 再確認：別のレベルも選択できることを確認
-    // 再度ドロップダウンを開く
-    await levelButton.click();
-    await page.waitForTimeout(500);
-
-    // レベル5を選択
-    const level5Option = page.locator('[role="option"]').filter({ hasText: 'レベル 5' });
-    await level5Option.click();
-    await page.waitForTimeout(500);
-
-    // レベル5に変わったことを確認
-    await expect(levelButton).toContainText('レベル 5');
-
-    // レベル5に変更後のZustand状態確認
-    const stateAfterLevel5 = await getZustandState(page);
-    expect(stateAfterLevel5.level).toBe(5);
   });
 
   // Zustandストアの初期状態テスト
