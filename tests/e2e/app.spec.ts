@@ -91,7 +91,7 @@ test.describe('タスクマスターアプリの基本テスト', () => {
 
     // 選択肢（オプション）が表示されていることを確認
     const options = page.locator('[role="option"]');
-    await expect(options).toHaveCount(4); // 4つのレベル選択肢
+    await expect(options).toHaveCount(3); // 3つのレベル選択肢
 
     // 3. レベル3を選択
     const level3Option = page.locator('[role="option"]').filter({ hasText: 'レベル 3' });

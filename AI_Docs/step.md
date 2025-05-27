@@ -12,7 +12,7 @@
 | Step 4   | タスク操作機能             | タスク作成・表示・編集・削除機能                  |
 | Step 5   | ドラッグ＆ドロップ基本実装 | Framer Motionによる基本D&D                        |
 | Step 6   | タイムライン機能           | タスク配置・時間軸表示                            |
-| Step 7   | 高度なタスク機能           | 条件・待ち時間・依頼機能                          |
+| Step 7   | 高度なタスク機能           | 条件・待ち時間機能                                |
 | Step 8   | レベル機能                 | レベル別機能制限・割り込み                        |
 | Step 9   | アニメーション強化         | GSAPによる派手なエフェクト                        |
 | Step 10  | 保存機能                   | localStorageによるデータ保存                      |
@@ -417,7 +417,7 @@ const Timeline = () => {
   - 5.  ディレクトリ構造
   - 6.4 機能要件の具体例
 
-**目標**: 条件・待ち時間・依頼機能など高度なタスク機能の実装
+**目標**: 条件・待ち時間など高度なタスク機能の実装
 
 **タスク**:
 
@@ -469,13 +469,13 @@ const checkTaskConditions = (task, layoutTasks) => {
 
 1. レベルごとの機能制限実装（使用可能なタスクタイプの制限）
 2. レベル1〜4の条件分岐実装
-3. レベル変更時の状態リセット機能実装
+3. レベル変更時の状態(グレーアウト)リセット機能実装
 4. レベル別のヘルプテキスト実装
 
 **確認方法**:
 
 - 各レベルで適切なタスクタイプのみが使用可能なことを確認
-- レベル変更時に状態がリセットされることを確認
+- レベル変更時に状態(グレーアウト)がリセットされることを確認
 - Playwrightで各レベルの機能をテスト
 
 ```typescript
@@ -484,7 +484,6 @@ const filterTasksByLevel = (tasks, level) => {
   return tasks.filter((task) => {
     if (level < 2 && task.condition) return false;
     if (level < 3 && task.waitTime) return false;
-    if (level < 4 && task.request) return false;
     return true;
   });
 };

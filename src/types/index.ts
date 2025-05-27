@@ -17,7 +17,6 @@ export interface Task {
   };
   duration2?: number; // 所要時間2（分）- 待ち時間後
   condition?: string; // 条件となるタスクID（任意）
-  request?: string; // 依頼内容（任意）
   color: string; // タスクカードの色
   isPreset: boolean; // プリセットタスクかどうか
 }
@@ -40,7 +39,7 @@ export interface LayoutTask extends Task {
  * アプリ全体の状態を管理する
  */
 export interface AppState {
-  level: 1 | 2 | 3 | 4; // 現在のレベル
+  level: 1 | 2 | 3; // 現在のレベル
   availableTasks: Task[]; // 使用可能なタスク一覧
   taskPool: Task[]; // タスクプール内のタスク
   layoutTasks: LayoutTask[]; // レイアウト配置済みタスク
@@ -48,7 +47,7 @@ export interface AppState {
   error: string | null; // 最新エラーメッセージ
 
   // アクション
-  setLevel: (_level: 1 | 2 | 3 | 4) => void;
+  setLevel: (_level: 1 | 2 | 3) => void;
   toggleSideMenu: () => void;
   addTask: (_task: Task) => void;
   updateTask: (_id: string, _updates: Partial<Task>) => void;

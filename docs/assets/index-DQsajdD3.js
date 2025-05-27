@@ -243,7 +243,7 @@ const pt = u.forwardRef(({ className: t, ...o }, s) =>
   e.jsx(Y, { ref: s, className: v('px-2 py-1.5 text-sm font-semibold', t), ...o })
 );
 pt.displayName = Y.displayName;
-const I = u.forwardRef(({ className: t, children: o, ...s }, a) =>
+const E = u.forwardRef(({ className: t, children: o, ...s }, a) =>
   e.jsxs(Z, {
     ref: a,
     className: v(
@@ -260,7 +260,7 @@ const I = u.forwardRef(({ className: t, children: o, ...s }, a) =>
     ],
   })
 );
-I.displayName = Z.displayName;
+E.displayName = Z.displayName;
 const gt = u.forwardRef(({ className: t, ...o }, s) =>
   e.jsx(ee, { ref: s, className: v('-mx-1 my-1 h-px bg-muted', t), ...o })
 );
@@ -1214,7 +1214,7 @@ const P = 30,
   $ = 28,
   B = 4,
   H = 5,
-  E = 30,
+  I = 30,
   Mt = ({ tasks: t }) => {
     console.log('Timeline tasks:', JSON.stringify(t, null, 2));
     const o = t.reduce((i, p) => Math.max(i, p.endTime), 0),
@@ -1240,7 +1240,7 @@ const P = 30,
           `time-marker-${p}`
         )
       ),
-      r = Math.max(200, t.length * ($ + B) + H + E + 20),
+      r = Math.max(200, t.length * ($ + B) + H + I + 20),
       [l, h] = u.useState(null),
       [b, j] = u.useState(!1),
       w = y((i) => i.removeTaskFromLayoutAndAddToPool),
@@ -1265,12 +1265,12 @@ const P = 30,
       children: [
         e.jsx('div', {
           className: 'absolute top-0 left-0 w-full',
-          style: { height: `${E}px`, zIndex: 1 },
+          style: { height: `${I}px`, zIndex: 1 },
           children: a,
         }),
         e.jsx('div', {
           className: 'absolute w-full',
-          style: { top: `${E}px`, height: `${r - E}px` },
+          style: { top: `${I}px`, height: `${r - I}px` },
           children: t.map((i) => {
             const p = {
                 position: 'absolute',
@@ -1646,10 +1646,9 @@ ${f.message}`);
                   }),
                   e.jsxs(he, {
                     children: [
-                      e.jsx(I, { value: '1', children: 'レベル 1: 基本の時間管理' }),
-                      e.jsx(I, { value: '2', children: 'レベル 2: 条件付きタスク' }),
-                      e.jsx(I, { value: '3', children: 'レベル 3: 待ち時間あり' }),
-                      e.jsx(I, { value: '4', children: 'レベル 4: 複雑な依存関係' }),
+                      e.jsx(E, { value: '1', children: 'レベル 1: 基本の時間管理' }),
+                      e.jsx(E, { value: '2', children: 'レベル 2: 条件付きタスク' }),
+                      e.jsx(E, { value: '3', children: 'レベル 3: 待ち時間あり' }),
                     ],
                   }),
                 ],
