@@ -75,7 +75,7 @@ export default defineConfig({
 
   /* 開発サーバーの設定 */
   webServer: {
-    command: 'npm run dev',
+    command: process.env.PLAYWRIGHT_SKIP_WEBSERVER ? undefined : 'npm run dev1',
     url: 'http://localhost:5173',
     reuseExistingServer: !process.env.CI,
     stdout: 'ignore',

@@ -4,11 +4,17 @@ import { Button } from '@/components/ui/button';
 import useAppStore from '@/store';
 import { Task } from '@/types';
 import TaskEditModal from './TaskEditModal';
+import { isTaskAllowedForLevel, getLevelRestrictionMessage } from '@/lib/level';
 
 const TaskItem = ({ task, onEdit }: { task: Task; onEdit: (task: Task) => void }) => {
   const moveTaskToPool = useAppStore((state) => state.moveTaskToPool);
+  const level = useAppStore((state) => state.level);
+
+  const disabled = !isTaskAllowedForLevel(task, level);
+  const tooltip = getLevelRestrictionMessage(task, level);
 
   const handleAddToPool = () => {
+    if (disabled) return;
     moveTaskToPool(task);
     console.log('タスクをプールに追加しました:', task.name);
   };
@@ -16,8 +22,11 @@ const TaskItem = ({ task, onEdit }: { task: Task; onEdit: (task: Task) => void }
   return (
     <div className="flex items-center gap-2 p-2 rounded-md bg-white border border-gray-200 mb-2 group">
       <div
-        className={`flex-grow py-1.5 px-3 rounded-md ${task.color} shadow-sm cursor-pointer`}
+        className={`flex-grow py-1.5 px-3 rounded-md ${task.color} shadow-sm ${
+          disabled ? 'opacity-50 grayscale' : 'cursor-pointer'
+        }`}
         onClick={() => onEdit(task)}
+        title={tooltip}
       >
         <h3 className="font-medium text-sm text-gray-800">{task.name}</h3>
         <div className="flex flex-wrap justify-between items-center mt-1 gap-1 text-xs">
@@ -42,8 +51,9 @@ const TaskItem = ({ task, onEdit }: { task: Task; onEdit: (task: Task) => void }
       <Button
         size="sm"
         variant="ghost"
-        className="opacity-60 group-hover:opacity-100"
+        className={`opacity-60 group-hover:opacity-100 ${disabled && 'cursor-not-allowed'}`}
         onClick={handleAddToPool}
+        disabled={disabled}
       >
         <Plus className="h-4 w-4" />
       </Button>

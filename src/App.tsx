@@ -337,6 +337,11 @@ function App() {
     window.APP_STORE_AVAILABLE = true;
   }, []);
 
+  // レベル変更時、タスクプール/利用可能タスクをフィルタリング（グレイアウトのみで削除しない）
+  useEffect(() => {
+    console.log('レベル変更:', level);
+  }, [level]);
+
   return (
     <DndContextWrapper
       onDragStart={handleDragStart}

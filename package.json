@@ -6,6 +6,7 @@
   "homepage": "https://2dice.github.io/task-master/",
   "scripts": {
     "dev": "npm run lint && npm run format && vite",
+    "dev1": "vite",
     "build": "node AI_Docs/extract-toc.js AI_Docs/design.md AI_Docs/step.md && tsc -b && vite build",
     "lint": "eslint .",
     "format": "prettier --write .",

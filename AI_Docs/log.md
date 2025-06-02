@@ -411,3 +411,45 @@
 - TypeScript 型定義に `waitTime?: { duration: number; variance?: number }` を追加
 - phase2 自動追加は placePhase2 で setTimeout を使用
 - 配置エラーのハンドリングは TaskLayout の state.error で実装し、UIでリセット処理を行う
+
+## Step 8: レベル別タスク制限とテスト（2025-06-02）
+
+### うまくいった手法（手順）
+
+1. **レベル別タスク制限ロジックの実装**
+   - `src/lib/level.ts` に `isTaskAllowedForLevel` と `getLevelRestrictionMessage` を実装し、タスクの条件（condition）と待ち時間（waitTime）に基づいてレベルごとの利用可否を判定。
+   - UIコンポーネント (`TaskList.tsx`, `TaskPool.tsx`) で上記ロジックを利用し、許可されないタスクはグレーアウト表示およびボタンを無効化。
+2. **Playwright E2Eテストの作成と改善**
+   - `tests/e2e/level.spec.ts` を新規作成し、レベル変更とタスクの有効/無効状態、プールへの追加可否をテスト。
+   - テストの安定性向上のため、UI操作（ボタンクリックなど）からストアのアクション（`AppStore.getState().setLevel()`など）を直接呼び出す方式に変更。
+   - Playwrightのロケータで複数要素がヒットする問題を、より具体的なXPathや`.first()`、`.locator().first()`を駆使して解決。
+3. **ESLint/TypeScriptエラーの段階的修正**
+   - `no-explicit-any` エラーに対し、最初は汎用的な型キャストで対応し、その後 `AppState` 型を特定してより厳密な型を指定。
+   - モジュール解決エラーに対し、`tsconfig.json` の `paths` 設定を確認し、テストファイルからの相対パスを修正。
+   - `@ts-ignore` を `@ts-expect-error` に置換。
+
+### 汎用的なナレッジ（タスク進め方や問題解決手法など）
+
+1. **E2Eテストの段階的デバッグ**
+   - テスト失敗時は、まずエラーメッセージとスタックトレースを詳細に確認。
+   - Playwrightのデバッグ機能（`PWDEBUG=1`）や `page.pause()`、コンソールログ出力を活用して問題箇所を特定。
+   - UI操作が不安定な場合は、ストアの状態を直接操作するなど、テストの前提条件を簡略化して問題の切り分けを行う。
+2. **型エラーへの体系的アプローチ**
+   - `any`型エラーは、まず関連する型定義ファイルを確認し、適切な型が存在すればそれを使用する。
+   - モジュール解決エラーは、`tsconfig.json`の `baseUrl` と `paths` の設定、およびファイル間の相対パスを入念に確認する。
+   - 型キャストが必要な場合、`as unknown as SpecificType` のように段階的にキャストすることで、TypeScriptコンパイラのエラーメッセージからヒントを得やすくなることがある。
+
+### 具体的なナレッジ（ツールの使い方やハマりやすいポイント）
+
+1. **Playwrightのロケータ戦略**
+   - `getByText`, `getByRole` などのアクセシビリティ指向のロケータを優先的に使用する。
+   - それでも要素が一意に特定できない場合は、XPathやCSSセレクタを検討するが、その際はDOM構造の変更に弱いことを意識する。
+   - `locator.first()` や `locator.nth()` は、複数の要素がヒットする場合の最終手段として有効だが、テストの意図が曖昧になる可能性もあるため注意が必要。
+   - 要素の可視性や有効性を確認する際は、適切な待機処理 (`waitForTimeout`, `expect().toBeVisible()`) を挟むことが重要。
+2. **ZustandストアのE2Eテスト**
+   - `page.evaluate()` を使用してブラウザコンテキスト内でストアのメソッドを呼び出したり、状態を取得したりできる。
+   - `window` オブジェクトにストアをアタッチしておくことで、テストコードからのアクセスが容易になる。
+   - 型安全性を保つため、`evaluate` 内での `window` オブジェクトの型キャストは、実際のストアの型に合わせて正確に行う。
+3. **ESLintとTypeScriptの連携**
+   - `@typescript-eslint/no-explicit-any` は、コードの型安全性を高めるために重要なルール。極力具体的な型を指定する。
+   - `@typescript-eslint/ban-ts-comment` は、`@ts-ignore` の代わりに `@ts-expect-error` を推奨する。これにより、意図しないエラー抑制を防ぐことができる。

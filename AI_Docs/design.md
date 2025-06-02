@@ -281,7 +281,6 @@ layoutTasks: [
 │   ├── components/        # Reactコンポーネント
 │   │   ├── ui/            # shadcn/uiコンポーネント
 │   │   ├── drag/          # dnd-kit ドラッグ&ドロップ関連
-│   │   ├── LevelSelector/ # レベル選択コンポーネント
 │   │   ├── TaskCreator.tsx   # タスク作成コンポーネント
 │   │   ├── TaskLayout.tsx    # タスクレイアウトコンポーネント
 │   │   ├── TaskPool.tsx      # タスクプールコンポーネント
@@ -290,6 +289,7 @@ layoutTasks: [
 │   ├── hooks/             # カスタムフック
 │   ├── lib/               # ユーティリティ関数やサードパーティライブラリ統合
 │   │   ├── utils.ts       # 一般的なユーティリティ関数
+│   │   ├── level.ts       # レベル制限ユーティリティ
 │   │   └── dnd/           # dnd-kit関連の設定とヘルパー
 │   ├── store/             # Zustandストア
 │   ├── types/             # 型定義
@@ -304,6 +304,7 @@ layoutTasks: [
 ├── tests/                 # テスト
 │   ├── e2e/               # E2Eテスト (Playwright)
 │   │   ├── app.spec.ts          # アプリ全体のE2Eテスト
+│   │   ├── level.spec.ts        # レベル別タスク制限のE2Eテスト
 │   │   ├── timeline.spec.ts     # タイムライン機能のE2Eテスト
 │   │   └── global-setup.ts # Playwrightのグローバルセットアップ
 │   └── unit/              # ユニットテスト
