@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Menu } from 'lucide-react';
+import TransitionScreen from '@/components/TransitionScreen'; // ★追加
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -18,6 +19,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import useAppStore from '@/store';
 import { Task } from '@/types';
+import { playGlobalErrorEffect } from '@/animations/gsap/taskEffects';
 import TaskCreator from '@/components/TaskCreator';
 import TaskList from '@/components/TaskList';
 import TaskPool from '@/components/TaskPool';
@@ -32,6 +34,8 @@ function App() {
   const showSideMenu = useAppStore((state) => state.showSideMenu);
   const setLevel = useAppStore((state) => state.setLevel);
   const toggleSideMenu = useAppStore((state) => state.toggleSideMenu);
+  const setIsTransitioning = useAppStore((state) => state.setIsTransitioning); // ★追加
+  const isTransitioning = useAppStore((state) => state.isTransitioning); // ★追加
 
   // ドラッグ＆ドロップ用のアクション
   const removeTaskFromPool = useAppStore((state) => state.removeTaskFromPool);
@@ -83,6 +87,16 @@ function App() {
     console.log('条件タスクがレイアウトに存在する: 判定結果=true');
     return { valid: true, message: '' };
   };
+
+  // レベル変更のトランジションが終わったら isTransitioning を false にする
+  useEffect(() => {
+    if (isTransitioning) {
+      const timer = setTimeout(() => {
+        setIsTransitioning(false);
+      }, 500); // TransitionScreen の duration 合計 (0.5 + 0.5)
+      return () => clearTimeout(timer);
+    }
+  }, [isTransitioning, setIsTransitioning]);
 
   // DndKit用のイベントハンドラ
   const handleDragStart = (event: DragStartEvent) => {
@@ -174,7 +188,16 @@ function App() {
           console.error('条件チェックエラー:', conditionCheck.message);
 
           // アラート表示（簡易版）
-          alert(`このタスクはまだ配置できないよ！\n${conditionCheck.message}`);
+          // alertの代わりにグローバルエラーエフェクトを直接呼び出す
+          // alert(`このタスクはまだ配置できないよ！\n${conditionCheck.message}`);
+
+          // 全画面エラーエフェクトを直接実行
+          playGlobalErrorEffect();
+
+          // コンソールに表示
+          console.log(
+            `エラーメッセージ: このタスクはまだ配置できないよ！ ${conditionCheck.message}`
+          );
 
           return; // 処理終了
         }
@@ -343,71 +366,75 @@ function App() {
   }, [level]);
 
   return (
-    <DndContextWrapper
-      onDragStart={handleDragStart}
-      onDragOver={handleDragOver}
-      onDragEnd={handleDragEnd}
-    >
-      <div className="flex flex-col h-screen w-screen min-w-full max-w-none bg-slate-100 app-container">
-        {/* ヘッダー: レベル設定エリア */}
-        <header className="w-full min-w-full bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-10">
-          <div className="flex items-center gap-3">
-            {/* サイドメニュー: タスク確認・作成エリア */}
-            <Sheet open={showSideMenu} onOpenChange={toggleSideMenu}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:flex hover:bg-slate-100">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent
-                side="left"
-                className="w-[85vw] sm:w-[400px] md:w-[350px] lg:max-w-sm border-r-2 bg-white p-6 flex flex-col"
-              >
-                <SheetTitle>タスク確認・作成</SheetTitle>
-                <SheetDescription>タスクの作成・編集・削除ができます</SheetDescription>
-                <div className="flex flex-col mt-6 h-[calc(100vh-180px)] overflow-hidden">
-                  <div className="mt-2">ゲームで使いたいタスクをここで設定してね♪</div>
-                  <TaskCreator />
-                  <TaskList />
-                </div>
-              </SheetContent>
-            </Sheet>
-            <h1 className="text-xl font-bold text-indigo-600">タスクマスター</h1>
-          </div>
+    <TransitionScreen>
+      {' '}
+      {/* ★変更: TransitionScreenでラップ */}
+      <DndContextWrapper
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
+      >
+        <div className="flex flex-col h-screen w-screen min-w-full max-w-none bg-slate-100 app-container">
+          {/* ヘッダー: レベル設定エリア */}
+          <header className="w-full min-w-full bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-10">
+            <div className="flex items-center gap-3">
+              {/* サイドメニュー: タスク確認・作成エリア */}
+              <Sheet open={showSideMenu} onOpenChange={toggleSideMenu}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="md:flex hover:bg-slate-100">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent
+                  side="left"
+                  className="w-[85vw] sm:w-[400px] md:w-[350px] lg:max-w-sm border-r-2 bg-white p-6 flex flex-col"
+                >
+                  <SheetTitle>タスク確認・作成</SheetTitle>
+                  <SheetDescription>タスクの作成・編集・削除ができます</SheetDescription>
+                  <div className="flex flex-col mt-6 h-[calc(100vh-180px)] overflow-hidden">
+                    <div className="mt-2">ゲームで使いたいタスクをここで設定してね♪</div>
+                    <TaskCreator />
+                    <TaskList />
+                  </div>
+                </SheetContent>
+              </Sheet>
+              <h1 className="text-xl font-bold text-indigo-600">タスクマスター</h1>
+            </div>
 
-          <Select
-            value={level.toString()}
-            onValueChange={(value) => setLevel(Number(value) as 1 | 2 | 3)}
-          >
-            <SelectTrigger className="w-[180px] md:w-[220px] lg:w-[280px] bg-white border-slate-200">
-              <SelectValue placeholder="レベルを選択" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="1">レベル 1: 基本の時間管理</SelectItem>
-              <SelectItem value="2">レベル 2: 条件付きタスク</SelectItem>
-              <SelectItem value="3">レベル 3: 待ち時間あり</SelectItem>
-            </SelectContent>
-          </Select>
-        </header>
+            <Select
+              value={level.toString()}
+              onValueChange={(value) => setLevel(Number(value) as 1 | 2 | 3)}
+            >
+              <SelectTrigger className="w-[180px] md:w-[220px] lg:w-[280px] bg-white border-slate-200">
+                <SelectValue placeholder="レベルを選択" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">レベル 1: 基本の時間管理</SelectItem>
+                <SelectItem value="2">レベル 2: 条件付きタスク</SelectItem>
+                <SelectItem value="3">レベル 3: 待ち時間あり</SelectItem>
+              </SelectContent>
+            </Select>
+          </header>
 
-        {/* メインコンテンツと下部のタスクプールを含む領域 */}
-        <div className="flex-grow flex flex-col w-full min-w-full">
-          {/* メインコンテンツ: タスクレイアウトエリア */}
-          <main className="flex-grow p-4 w-full min-w-full">
-            <DroppableArea id="task-layout" className="h-full w-full">
-              <TaskLayout />
-            </DroppableArea>
-          </main>
+          {/* メインコンテンツと下部のタスクプールを含む領域 */}
+          <div className="flex-grow flex flex-col w-full min-w-full">
+            {/* メインコンテンツ: タスクレイアウトエリア */}
+            <main className="flex-grow p-4 w-full min-w-full">
+              <DroppableArea id="task-layout" className="h-full w-full">
+                <TaskLayout />
+              </DroppableArea>
+            </main>
 
-          <Separator className="w-full bg-slate-300" />
+            <Separator className="w-full bg-slate-300" />
 
-          {/* フッター: タスクプールエリア */}
-          <div className="h-1/4 md:h-1/5 lg:h-1/4 bg-white p-4 shadow-inner border-t border-slate-200 w-full min-w-full">
-            <TaskPool />
+            {/* フッター: タスクプールエリア */}
+            <div className="h-1/4 md:h-1/5 lg:h-1/4 bg-white p-4 shadow-inner border-t border-slate-200 w-full min-w-full">
+              <TaskPool />
+            </div>
           </div>
         </div>
-      </div>
-    </DndContextWrapper>
+      </DndContextWrapper>
+    </TransitionScreen> /* ★変更: TransitionScreenでラップ */
   );
 }
 

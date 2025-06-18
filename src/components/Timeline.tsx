@@ -1,4 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import useAppStore from '@/store';
+import { initPinchZoom, adjustTaskNameDisplay } from '@/animations/gsap/timelineEffects';
+import { createWaitTaskPulseEffect } from '@/animations/gsap/waitTaskEffects';
+import { playTaskDissolveEffect } from '@/animations/gsap/taskEffects';
+import { AppState } from '@/types'; // AppStateをインポート
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,8 +14,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import useAppStore from '@/store';
-import { AppState } from '@/types'; // AppStateをインポート
 
 // タスクの型定義
 export interface Task {
@@ -38,8 +41,6 @@ const INITIAL_TOP_OFFSET = 5; // px
 const TIME_MARKER_AREA_HEIGHT = 30; // 時間マーカー部分の高さ（仮）
 
 const Timeline: React.FC<TimelineProps> = ({ tasks }) => {
-  console.log('Timeline tasks:', JSON.stringify(tasks, null, 2)); // ★デバッグ用のログ追加
-
   // タスク配置に基づく横幅を計算
   const maxEndMinute = tasks.reduce((max, t) => Math.max(max, t.endTime), 0);
   // 少し余白を設け、最低でも30分幅を確保
@@ -75,30 +76,32 @@ const Timeline: React.FC<TimelineProps> = ({ tasks }) => {
     tasks.length * (TASK_HEIGHT + ROW_MARGIN) + INITIAL_TOP_OFFSET + TIME_MARKER_AREA_HEIGHT + 20 // タスク行数に基づく高さ + マーカーエリア + 余白
   );
 
-  const [taskToCancel, setTaskToCancel] = useState<Task | null>(null);
-  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+  // タイムラインコンテナへの参照
+  const timelineContainerRef = useRef<HTMLDivElement>(null);
+
+  // ズームスケールの状態管理、setState関数だけ使用
+  const [, setCurrentScale] = useState(1);
 
   const removeTaskFromLayoutAndAddToPool = useAppStore(
     (state: AppState) => state.removeTaskFromLayoutAndAddToPool
   );
   const placePhase2 = useAppStore((state: AppState) => state.placePhase2);
 
-  const handleTaskClick = (task: Task) => {
-    // phase2 未配置でduration2がある場合は後半配置確認
-    if (task.duration2 && !task.phase2Placed) {
-      placePhase2(task.id);
-      return;
-    }
+  // タスク解除ダイアログ用 state
+  const [taskToCancel, setTaskToCancel] = useState<Task | null>(null);
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
 
-    setTaskToCancel(task);
-    setIsCancelDialogOpen(true);
-  };
-
+  // 確認ダイアログで解除確定
   const handleCancelConfirm = () => {
     if (taskToCancel) {
-      removeTaskFromLayoutAndAddToPool(taskToCancel.id); // ストアのアクションを呼び出す
-      // console.log('Cancelling task:', taskToCancel.id);
-      // TODO: ストアにタスク解除アクションを実装し、ここで呼び出す -> 実装済みなのでこのTODOは削除
+      const el = document.querySelector(`[data-testid="task-item-${taskToCancel.id}"]`);
+      if (el) {
+        playTaskDissolveEffect(el as HTMLElement, () => {
+          removeTaskFromLayoutAndAddToPool(taskToCancel.id);
+        });
+      } else {
+        removeTaskFromLayoutAndAddToPool(taskToCancel.id);
+      }
     }
     setIsCancelDialogOpen(false);
     setTaskToCancel(null);
@@ -109,8 +112,33 @@ const Timeline: React.FC<TimelineProps> = ({ tasks }) => {
     setTaskToCancel(null);
   };
 
+  // ピンチズーム機能の初期化
+  useEffect(() => {
+    if (!timelineContainerRef.current) return;
+
+    // ピンチズーム初期化
+    const cleanupPinchZoom = initPinchZoom(timelineContainerRef.current, {
+      minScale: 0.5,
+      maxScale: 2.5,
+      onZoomChange: (scale) => {
+        setCurrentScale(scale);
+
+        // スケールに応じてタスク名の表示を調整
+        if (timelineContainerRef.current) {
+          adjustTaskNameDisplay(timelineContainerRef.current, scale);
+        }
+      },
+    });
+
+    return () => {
+      // クリーンアップ関数を実行
+      cleanupPinchZoom();
+    };
+  }, []);
+
   return (
     <div
+      ref={timelineContainerRef}
       className="relative bg-slate-50"
       style={{
         width: `${totalMinutes * MINUTE_WIDTH + MINUTE_WIDTH}px`,
@@ -181,9 +209,20 @@ const Timeline: React.FC<TimelineProps> = ({ tasks }) => {
             const waitMinutes = waitEnd - waitStart;
             segments.push(
               <div
-                key="wait"
-                className="h-full flex items-center justify-center text-[10px] bg-gray-100 text-gray-600 border-dashed border-x border-gray-400 select-none"
+                key={`wait-${task.id}`}
+                className="relative z-10 pointer-events-auto h-full flex items-center justify-center text-[10px] bg-gray-100 text-gray-600 border-dashed border-x border-gray-400 select-none wait-task-segment"
                 style={{ width: `${waitMinutes * MINUTE_WIDTH}px` }}
+                // ref を元に戻す
+                ref={(el) => {
+                  if (el) {
+                    // elがある時だけ実行し、createWaitTaskPulseEffectの戻り値（クリーンアップ関数）を返す
+                    return createWaitTaskPulseEffect(el, {
+                      color: 'rgba(129, 140, 248, 0.3)',
+                      duration: 2,
+                      intensity: 0.7,
+                    });
+                  }
+                }}
               >
                 待ち
               </div>
@@ -208,15 +247,56 @@ const Timeline: React.FC<TimelineProps> = ({ tasks }) => {
               key={task.id}
               style={taskStyle}
               data-testid={`task-item-${task.id}`}
-              onClick={() => handleTaskClick(task)}
               className={`flex flex-row h-full ${task.color}`}
+              // このonClickの内容を差し替えます！
+              onClick={(e) => {
+                e.stopPropagation();
+                const rect = e.currentTarget.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+
+                // phase1の幅
+                const phase1Width = task.duration1 * MINUTE_WIDTH;
+
+                // 待ち時間セグメントの幅
+                const waitMinutes =
+                  task.waitEndTime !== undefined && task.duration2
+                    ? (task.phase2StartTime ?? task.waitEndTime) - (task.startTime + task.duration1)
+                    : 0;
+                const waitWidth = waitMinutes * MINUTE_WIDTH;
+
+                // クリック位置が待ち時間セグメント内かどうかを判定
+                const isClickOnWaitSegment =
+                  task.waitEndTime !== undefined && // 待ち時間があるタスクか
+                  task.duration2 && // duration2があるか (つまり待ち時間タスク)
+                  !task.phase2Placed && // phase2がまだ配置されていないか
+                  clickX >= phase1Width && // クリック位置がphase1の後か
+                  clickX < phase1Width + waitWidth; // クリック位置が待ち時間セグメントの終わりより前か
+
+                console.warn(
+                  `[Timeline] Task Click: ${task.id}, ` +
+                    `clickX: ${clickX.toFixed(1)}, ` +
+                    `phase1Width: ${phase1Width.toFixed(1)}, ` +
+                    `waitWidth: ${waitWidth.toFixed(1)}, ` +
+                    `isClickOnWaitSegment: ${isClickOnWaitSegment}, ` +
+                    `target: ${(e.target as HTMLElement).className}`
+                );
+
+                if (isClickOnWaitSegment) {
+                  console.warn(`[Timeline] Action: placePhase2 for ${task.id}`);
+                  placePhase2(task.id);
+                } else {
+                  console.warn(`[Timeline] Action: Open cancel dialog for ${task.id}`);
+                  setTaskToCancel(task);
+                  setIsCancelDialogOpen(true);
+                }
+              }}
             >
               {segments}
             </div>
           );
         })}
       </div>
-
+      {/* 解除確認ダイアログ */}
       {taskToCancel && (
         <AlertDialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
           <AlertDialogContent>

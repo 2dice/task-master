@@ -45,9 +45,11 @@ export interface AppState {
   layoutTasks: LayoutTask[]; // レイアウト配置済みタスク
   showSideMenu: boolean; // サイドメニュー表示状態
   error: string | null; // 最新エラーメッセージ
+  isTransitioning: boolean; // ★追加: レベル変更トランジション中フラグ
 
   // アクション
   setLevel: (_level: 1 | 2 | 3) => void;
+  setIsTransitioning: (isTransitioning: boolean) => void; // ★追加
   toggleSideMenu: () => void;
   addTask: (_task: Task) => void;
   updateTask: (_id: string, _updates: Partial<Task>) => void;

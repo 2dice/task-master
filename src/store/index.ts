@@ -50,9 +50,27 @@ const useAppStore = create<AppState>((set, get) => ({
   showSideMenu: false,
   showingInterruption: false,
   error: null, // 最新エラーメッセージ
+  isTransitioning: false, // ★追加: レベル変更トランジション中フラグ
 
   // アクション
-  setLevel: (level) => set({ level }),
+  setLevel: (level) =>
+    set((state) => {
+      if (state.level === level) {
+        console.warn(`[store] setLevel: Level is already ${level}. No change.`);
+        return {}; // 同じレベルなら何もしない
+      }
+      return {
+        level,
+        isTransitioning: true, // ★追加: トランジション開始！
+        taskPool: [], // レベル変更時にタスクプールを空にする
+        layoutTasks: [], // レベル変更時にレイアウトタスクを空にする
+      };
+    }),
+
+  setIsTransitioning: (isTransitioning: boolean) => {
+    console.log(`[store] setIsTransitioning: Setting to ${isTransitioning}`);
+    set({ isTransitioning });
+  },
 
   toggleSideMenu: () =>
     set((state) => ({
@@ -261,7 +279,22 @@ const useAppStore = create<AppState>((set, get) => ({
     }),
 
   // エラー操作
-  setError: (msg: string) => set({ error: msg }),
+  setError: (msg: string) => {
+    // エラーメッセージを設定
+    set({ error: msg });
+
+    // 全画面エラーエフェクトを実行
+    // モジュールロードの応答性を確保するために非同期ロード
+    import('@/animations/gsap/taskEffects').then((effects) => {
+      // エフェクトを今すぐ実行
+      if (effects.playGlobalErrorEffect) {
+        effects.playGlobalErrorEffect();
+      } else {
+        // フォールバックとして通常のエラーエフェクトを使用
+        console.warn('グローバルエラーエフェクトが見つかりません');
+      }
+    });
+  },
   clearError: () => set({ error: null }),
 }));
 

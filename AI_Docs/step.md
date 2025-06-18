@@ -449,7 +449,7 @@ const checkTaskConditions = (task, layoutTasks) => {
 };
 ```
 
-### Step 8: レベル機能
+### Step 8: レベル機能 (done)
 
 **参照が必要な設計情報(view_fileコマンド等で取得)**:
 
@@ -488,7 +488,7 @@ const filterTasksByLevel = (tasks, level) => {
 };
 ```
 
-### Step 9: アニメーション強化
+### Step 9: アニメーション強化(done)
 
 **参照が必要な設計情報(view_fileコマンド等で取得)**:
 
